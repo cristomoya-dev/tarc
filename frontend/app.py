@@ -14,32 +14,7 @@ st.set_page_config(
     layout="wide",
 )
 
-# ── Google Analytics ──────────────────────────────────────────────────────────
-# Reemplaza 'TU_GA_MEASUREMENT_ID' con tu ID real de Google Analytics (ej. G-XXXXXXXXXX)
-GA_ID = os.getenv("GA_MEASUREMENT_ID", "TU_GA_MEASUREMENT_ID")  # Configúralo en variables de entorno
-
-if GA_ID != "TU_GA_MEASUREMENT_ID":
-    # components.html() renderiza en un iframe aislado.
-    # Inyectamos el script en window.parent para que GA opere en la página real.
-    components.html(f"""
-    <script>
-    (function() {{
-      var p = window.parent;
-      if (p._gaLoaded) return;
-      p._gaLoaded = true;
-
-      var s = p.document.createElement('script');
-      s.async = true;
-      s.src = 'https://www.googletagmanager.com/gtag/js?id={GA_ID}';
-      p.document.head.appendChild(s);
-
-      p.dataLayer = p.dataLayer || [];
-      p.gtag = function(){{ p.dataLayer.push(arguments); }};
-      p.gtag('js', new Date());
-      p.gtag('config', '{GA_ID}');
-    }})();
-    </script>
-    """, height=0)
+# Google Analytics se inyecta en el index.html de Streamlit vía entrypoint.sh
 
 # ── Biblioteca de aspectos por tipo de contrato ───────────────────────────────
 

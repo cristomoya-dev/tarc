@@ -63,7 +63,7 @@ services:
     environment:
       API_URL: http://api:8000
       APP_PASSWORD: ${APP_PASSWORD:-tacrc2024}
-      GA_MEASUREMENT_ID: G-0M0KKSMENZ 
+      GA_MEASUREMENT_ID: ${GA_MEASUREMENT_ID:-}
     labels:
       - traefik.enable=true
       - traefik.http.routers.tarc.rule=Host(`tarc.cristobalmoyalopez.es`)
