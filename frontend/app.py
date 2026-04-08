@@ -19,13 +19,25 @@ st.set_page_config(
 GA_ID = os.getenv("GA_MEASUREMENT_ID", "TU_GA_MEASUREMENT_ID")  # Configúralo en variables de entorno
 
 if GA_ID != "TU_GA_MEASUREMENT_ID":
+    # components.html() renderiza en un iframe aislado.
+    # Inyectamos el script en window.parent para que GA opere en la página real.
     components.html(f"""
-    <script async src="https://www.googletagmanager.com/gtag/js?id={GA_ID}"></script>
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){{dataLayer.push(arguments);}}
-      gtag('js', new Date());
-      gtag('config', '{GA_ID}');
+    (function() {{
+      var p = window.parent;
+      if (p._gaLoaded) return;
+      p._gaLoaded = true;
+
+      var s = p.document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id={GA_ID}';
+      p.document.head.appendChild(s);
+
+      p.dataLayer = p.dataLayer || [];
+      p.gtag = function(){{ p.dataLayer.push(arguments); }};
+      p.gtag('js', new Date());
+      p.gtag('config', '{GA_ID}');
+    }})();
     </script>
     """, height=0)
 
