@@ -1,0 +1,108 @@
+services:
+
+  # ── Base de datos: PostgreSQL + pgvector ────────────────────────────────────
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: tacrc_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       ${POSTGRES_DB:-tacrc}
+      POSTGRES_USER:     ${POSTGRES_USER:-tacrc}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD es obligatorio}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro   # scripts SQL ejecutados al crear la BD
+    ports:
+      - "127.0.0.1:5433:5432"   # solo accesible desde localhost
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-tacrc} -d ${POSTGRES_DB:-tacrc}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tacrc_net
+
+  # ── API: FastAPI ────────────────────────────────────────────────────────────
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: tacrc_api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL:    postgresql+asyncpg://${POSTGRES_USER:-tacrc}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-tacrc}
+      OPENAI_API_KEY:  ${OPENAI_API_KEY:?OPENAI_API_KEY es obligatorio}
+      EMBED_MODEL:     ${EMBED_MODEL:-text-embedding-3-small}
+      EMBED_DIM:       ${EMBED_DIM:-1536}
+      LLM_MODEL:       ${LLM_MODEL:-gpt-4o-mini}
+      PDF_DIR:         /data/pdfs
+      LOG_LEVEL:       ${LOG_LEVEL:-info}
+    volumes:
+      - ${PDF_HOST_DIR:-./pdfs}:/data/pdfs:ro   # PDFs descargados montados en solo lectura
+    ports:
+      - "127.0.0.1:8003:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - tacrc_net
+
+  # ── Frontend: Streamlit ─────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: tacrc_frontend
+    restart: unless-stopped
+    environment:
+      API_URL: http://api:8000
+      APP_PASSWORD: ${APP_PASSWORD:-tacrc2024}
+      GA_MEASUREMENT_ID: G-0M0KKSMENZ 
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.tarc.rule=Host(`tarc.cristobalmoyalopez.es`)
+      - traefik.http.routers.tarc.tls=true
+      - traefik.http.routers.tarc.tls.certresolver=le
+      - traefik.http.services.tarc.loadbalancer.server.port=8501  
+      - traefik.docker.network=traefik-net
+    ports:
+      - "8501:8501"
+    depends_on:
+      - api
+    networks:
+      - tacrc_net
+      - traefik-net 
+
+  # ── Ingesta: contenedor one-shot ────────────────────────────────────────────
+  # Ejecutar manualmente:  docker compose run --rm ingest python ingest.py resoluciones.json
+  ingest:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: tacrc_ingest
+    profiles: ["ingest"]        # no arranca con `docker compose up`, solo bajo demanda
+    environment:
+      DATABASE_URL:   postgresql+asyncpg://${POSTGRES_USER:-tacrc}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-tacrc}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      EMBED_MODEL:    ${EMBED_MODEL:-text-embedding-3-small}
+      EMBED_DIM:      ${EMBED_DIM:-1536}
+      PDF_DIR:        /data/pdfs
+    volumes:
+      - ${PDF_HOST_DIR:-./pdfs}:/data/pdfs:ro
+      - ${JSON_HOST_DIR:-./data}:/data/json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - tacrc_net
+      
+    entrypoint: ["python", "ingest.py"]
+
+volumes:
+  postgres_data:
+
+networks:
+  tacrc_net:
+    driver: bridge
+  traefik-net:
+    external: true    
