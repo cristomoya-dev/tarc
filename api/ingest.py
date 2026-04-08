@@ -460,7 +460,13 @@ def _parse_llm_result(content: str) -> dict:
         # Validar importe
         if importe is not None:
             try:
-                importe = float(str(importe).replace(",", ".").replace(".", "", str(importe).count(".") - 1))
+                importe_str = str(importe).strip()
+                if "," in importe_str:
+                    # Formato europeo: "1.234.567,89" → 1234567.89
+                    importe = float(importe_str.replace(".", "").replace(",", "."))
+                else:
+                    # Formato anglosajón o entero: "1,234,567.89" o "1234567"
+                    importe = float(importe_str.replace(",", ""))
             except (ValueError, TypeError):
                 importe = None
 

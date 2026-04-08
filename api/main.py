@@ -150,14 +150,18 @@ async def health():
 
 @app.get("/stats")
 async def stats(db: AsyncSession = Depends(get_db)):
-    row = (await db.execute(text("SELECT * FROM v_estado_ingesta"))).mappings().one()
-    dist = (await db.execute(text(
-        "SELECT anio, sentido, total FROM v_stats_anio_sentido"
-    ))).mappings().all()
-    return {
-        "ingesta": dict(row),
-        "distribucion": [dict(r) for r in dist],
-    }
+    try:
+        row = (await db.execute(text("SELECT * FROM v_estado_ingesta"))).mappings().one()
+        dist = (await db.execute(text(
+            "SELECT anio, sentido, total FROM v_stats_anio_sentido"
+        ))).mappings().all()
+        return {
+            "ingesta": dict(row),
+            "distribucion": [dict(r) for r in dist],
+        }
+    except Exception as e:
+        logger.error(f"Error al obtener estadísticas: {e}")
+        return {"ingesta": {}, "distribucion": []}
 
 
 # ── Endpoint: valores únicos para filtros del frontend ───────────────────────
