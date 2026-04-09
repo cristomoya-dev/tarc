@@ -1,0 +1,228 @@
+/* ── TACRC · Global stylesheet ───────────────────────────────────────────────
+   Cargado vía st.markdown al inicio de app.py.
+   No modifica lógica de ejecución — solo apariencia.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* ── 1. Chrome de Streamlit ──────────────────────────────────────────────── */
+#MainMenu          { visibility: hidden; }
+footer             { visibility: hidden; }
+[data-testid="stToolbar"] { display: none; }
+[data-testid="stDecoration"] { display: none; }
+
+/* ── 2. Tipografía global ────────────────────────────────────────────────── */
+html, body, [class*="st-"], button, input, select, textarea {
+    font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif !important;
+}
+
+/* ── 3. Contenedor principal: reducir padding lateral en wide mode ─────────*/
+.block-container {
+    padding-top: 1.8rem !important;
+    padding-bottom: 2rem !important;
+    max-width: 1200px !important;
+}
+
+/* ── 4. Tabs principales ─────────────────────────────────────────────────── */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 2px;
+    border-bottom: 2px solid #e2e8f0;
+    background: transparent;
+}
+.stTabs [data-baseweb="tab"] {
+    padding: 8px 22px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748b;
+    border-radius: 6px 6px 0 0;
+    border-bottom: 3px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+}
+.stTabs [data-baseweb="tab"]:hover {
+    color: #1a4f9e;
+    background: #f0f4ff;
+}
+.stTabs [aria-selected="true"] {
+    color: #1a4f9e !important;
+    font-weight: 600 !important;
+    border-bottom: 3px solid #1a4f9e !important;
+    background: transparent !important;
+}
+
+/* ── 5. Botones ──────────────────────────────────────────────────────────── */
+.stButton > button,
+[data-testid="stFormSubmitButton"] > button {
+    border-radius: 6px !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    transition: background 0.15s, border-color 0.15s, color 0.15s !important;
+    letter-spacing: 0.01em !important;
+}
+
+/* Primario */
+.stButton > button[kind="primary"],
+[data-testid="stFormSubmitButton"] > button[kind="primary"] {
+    background-color: #1a4f9e !important;
+    border: none !important;
+    color: #ffffff !important;
+    padding: 8px 20px !important;
+}
+.stButton > button[kind="primary"]:hover,
+[data-testid="stFormSubmitButton"] > button[kind="primary"]:hover {
+    background-color: #163d7a !important;
+}
+
+/* Secundario */
+.stButton > button[kind="secondary"] {
+    background: transparent !important;
+    border: 1.5px solid #cbd5e1 !important;
+    color: #374151 !important;
+}
+.stButton > button[kind="secondary"]:hover {
+    border-color: #1a4f9e !important;
+    color: #1a4f9e !important;
+    background: #f0f4ff !important;
+}
+
+/* ── 6. Inputs / Selects / Textareas ─────────────────────────────────────── */
+.stTextInput input,
+.stTextArea textarea,
+.stNumberInput input {
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 6px !important;
+    font-size: 14px !important;
+    transition: border-color 0.15s, box-shadow 0.15s !important;
+}
+.stTextInput input:focus,
+.stTextArea textarea:focus,
+.stNumberInput input:focus {
+    border-color: #1a4f9e !important;
+    box-shadow: 0 0 0 3px rgba(26, 79, 158, 0.1) !important;
+    outline: none !important;
+}
+
+[data-baseweb="select"] > div:first-child {
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 6px !important;
+    transition: border-color 0.15s !important;
+}
+[data-baseweb="select"] > div:first-child:focus-within {
+    border-color: #1a4f9e !important;
+    box-shadow: 0 0 0 3px rgba(26, 79, 158, 0.1) !important;
+}
+
+/* Date input */
+[data-baseweb="input"] {
+    border-radius: 6px !important;
+}
+
+/* ── 7. Métricas ─────────────────────────────────────────────────────────── */
+[data-testid="metric-container"] {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    padding: 14px 18px !important;
+}
+[data-testid="stMetricValue"] {
+    font-size: 30px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    letter-spacing: -0.02em !important;
+}
+[data-testid="stMetricLabel"] > div {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    color: #64748b !important;
+}
+[data-testid="stMetricDelta"] {
+    font-size: 12px !important;
+}
+
+/* ── 8. Formularios ──────────────────────────────────────────────────────── */
+[data-testid="stForm"] {
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    padding: 20px 22px !important;
+    background: #fafbff !important;
+}
+
+/* ── 9. Expanders ────────────────────────────────────────────────────────── */
+[data-testid="stExpander"] {
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+}
+[data-testid="stExpander"] summary {
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    padding: 10px 14px !important;
+    transition: background 0.15s !important;
+}
+[data-testid="stExpander"] summary:hover {
+    background: #f8fafc !important;
+}
+
+/* ── 10. Alertas y cajas de información ──────────────────────────────────── */
+[data-testid="stAlert"] {
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    border: none !important;
+}
+[data-testid="stAlert"][data-baseweb="notification"] {
+    border-left: 4px solid currentColor !important;
+}
+
+/* ── 11. st.status / spinner ─────────────────────────────────────────────── */
+[data-testid="stStatusWidget"] {
+    border-radius: 8px !important;
+    border: 1px solid #e2e8f0 !important;
+    font-size: 14px !important;
+}
+
+/* ── 12. Divisores ───────────────────────────────────────────────────────── */
+hr {
+    border: none !important;
+    border-top: 1px solid #e2e8f0 !important;
+    margin: 12px 0 !important;
+}
+
+/* ── 13. Captions ────────────────────────────────────────────────────────── */
+.stCaption, [data-testid="stCaptionContainer"] {
+    color: #64748b !important;
+    font-size: 12px !important;
+}
+
+/* ── 14. Progress bars ───────────────────────────────────────────────────── */
+[data-testid="stProgressBar"] > div > div {
+    background: linear-gradient(90deg, #1a4f9e, #3b71ca) !important;
+    border-radius: 4px !important;
+}
+[data-testid="stProgressBar"] > div {
+    background: #e2e8f0 !important;
+    border-radius: 4px !important;
+    height: 6px !important;
+}
+
+/* ── 15. Popovers ────────────────────────────────────────────────────────── */
+[data-testid="stPopover"] button {
+    border-radius: 6px !important;
+    font-size: 12px !important;
+}
+
+/* ── 16. Radio buttons ───────────────────────────────────────────────────── */
+[data-testid="stRadio"] label {
+    font-size: 13px !important;
+    font-weight: 400 !important;
+}
+
+/* ── 17. Slider ──────────────────────────────────────────────────────────── */
+[data-testid="stSlider"] [data-baseweb="slider"] [role="slider"] {
+    background: #1a4f9e !important;
+    border-color: #1a4f9e !important;
+}
+
+/* ── 18. Scrollbar personalizado ─────────────────────────────────────────── */
+::-webkit-scrollbar               { width: 6px; height: 6px; }
+::-webkit-scrollbar-track         { background: #f1f5f9; }
+::-webkit-scrollbar-thumb         { background: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover   { background: #94a3b8; }

@@ -16,6 +16,8 @@ st.set_page_config(
 
 # Google Analytics se inyecta en el index.html de Streamlit vía entrypoint.sh
 
+st.markdown(f"<style>{open('style.css').read()}</style>", unsafe_allow_html=True)
+
 # ── Biblioteca de aspectos por tipo de contrato ───────────────────────────────
 
 ASPECTOS = {
