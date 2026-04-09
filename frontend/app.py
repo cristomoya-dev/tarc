@@ -507,7 +507,7 @@ with tab_chat:
                 f"{titulo[:28]}{'…' if len(titulo)>28 else ''}",
                 key=f"conv_{cid}",
                 use_container_width=True,
-                help=f"{fecha} · {turnos//2} preguntas",
+                help=f"{fecha} · {turnos // 2} {'pregunta' if turnos // 2 == 1 else 'preguntas'}",
             ):
                 # Cargar mensajes de esta conversación
                 try:
@@ -815,7 +815,10 @@ with tab_pliego:
             files["memoria"] = (uploaded_memoria.name, uploaded_memoria.getvalue(), "application/pdf")
         data = {"aspectos": aspectos, "top_k": str(top_k_p)}
 
-        with st.spinner("Analizando riesgo de recurso…"):
+        with st.status("Analizando riesgo de recurso…", expanded=True) as _status:
+            st.write(f"🔍 Buscando resoluciones TACRC relevantes para {len(lista)} aspectos…")
+            st.write("⚖️ Evaluando cada aspecto frente a la doctrina del tribunal…")
+            st.write("⏱️ Proceso estimado: 2-3 min. No cierres esta ventana.")
             try:
                 r = httpx.post(f"{API}/riesgo_pliego", files=files, data=data, timeout=240)
                 resp = r.json()
@@ -825,7 +828,14 @@ with tab_pliego:
                 for k in list(st.session_state.keys()):
                     if k.startswith("hist_"):
                         del st.session_state[k]
+                n_asp = len(resp.get("aspectos", []))
+                _status.update(
+                    label=f"✅ Análisis completado — {n_asp} aspectos evaluados",
+                    state="complete",
+                    expanded=False,
+                )
             except Exception as e:
+                _status.update(label="❌ Error en el análisis", state="error", expanded=True)
                 st.error(f"Error: {e}")
 
     # ── MOSTRAR RESULTADOS DE RIESGO (persisten en session_state) ─────────────
