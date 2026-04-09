@@ -10,7 +10,10 @@ footer             { visibility: hidden; }
 [data-testid="stDecoration"] { display: none; }
 
 /* ── 2. Tipografía global ────────────────────────────────────────────────── */
-html, body, [class*="st-"], button, input, select, textarea {
+/* Excluimos [class*="st-"] para no pisar la fuente Material Icons de Streamlit */
+html, body, button, input, select, textarea,
+p, li, label, h1, h2, h3, h4, h5, h6,
+.stMarkdown, .stText {
     font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif !important;
 }
 
