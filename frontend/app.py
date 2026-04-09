@@ -321,47 +321,84 @@ with tab_buscar:
     if "resumen_data"   not in st.session_state: st.session_state["resumen_data"]   = None
     if "resumen_numero" not in st.session_state: st.session_state["resumen_numero"] = None
 
-    with st.form("form_buscar"):
-        c_q, c_modo = st.columns([5, 1])
-        q = c_q.text_input(
-            "Búsqueda",
-            placeholder="Semántica: 'solvencia económica insuficiente' · Exacta: 'Totana' o '0340/2026'",
-        )
-        modo_busqueda = c_modo.radio(
-            "Modo",
-            ["Semántico", "Exacto"],
-            index=0,
-            help=(
-                "**Semántico**: busca por significado y conceptos relacionados.\n\n"
-                "**Exacto**: busca la palabra o frase literalmente en el texto. "
-                "Ideal para nombres propios, municipios, empresas o números de resolución."
-            ),
-        )
+    subtab_int, subtab_cam = st.tabs(["🔍 Búsqueda inteligente", "📋 Búsqueda por campos"])
 
-        c3, c4, c5, c6 = st.columns(4)
-        anio      = c3.selectbox("Año",     ["(todos)"] + [str(a) for a in filtros.get("anios", [])])
-        sentido   = c4.selectbox("Sentido", ["(todos)"] + filtros.get("sentidos", []))
-        ley       = c5.selectbox("Ley",     ["(todos)"] + filtros.get("leyes", []))
-        page_size = c6.selectbox("Por página", [20, 50, 100], index=0)
-        submitted = st.form_submit_button("Buscar", type="primary", use_container_width=True)
+    # ── Sub-tab 1: Búsqueda semántica / exacta ────────────────────────────────
+    with subtab_int:
+        with st.form("form_buscar_inteligente"):
+            c_q, c_modo = st.columns([5, 1])
+            q = c_q.text_input(
+                "Búsqueda",
+                placeholder="ej: 'solvencia económica insuficiente' o 'criterios adjudicación subjetivos'",
+            )
+            modo_busqueda = c_modo.radio(
+                "Modo",
+                ["Semántico", "Exacto"],
+                index=0,
+                help=(
+                    "**Semántico**: busca por significado y conceptos relacionados.\n\n"
+                    "**Exacto**: busca la palabra o frase literalmente en el texto. "
+                    "Ideal para nombres propios, municipios o empresas."
+                ),
+            )
+            c3, c4, c5 = st.columns(3)
+            sentido_i   = c3.selectbox("Sentido",    ["(todos)"] + filtros.get("sentidos", []), key="bi_sentido")
+            ley_i       = c4.selectbox("Ley",        ["(todos)"] + filtros.get("leyes",    []), key="bi_ley")
+            page_size_i = c5.selectbox("Por página", [20, 50, 100], index=0,                    key="bi_ps")
+            submitted_i = st.form_submit_button("Buscar", type="primary", use_container_width=True)
 
-    if submitted:
-        params = {"page_size": page_size}
-        if q:
-            params["q"]    = q
-            params["modo"] = "exacto" if modo_busqueda == "Exacto" else "semantico"
-        if anio != "(todos)":    params["anio"]    = anio
-        if sentido != "(todos)": params["sentido"] = sentido
-        if ley != "(todos)":     params["ley"]     = ley
-        st.session_state["buscar_params"]  = params
-        st.session_state["buscar_page"]    = 1
-        st.session_state["resumen_data"]   = None
-        st.session_state["resumen_numero"] = None
+        if submitted_i:
+            params_i = {"page_size": page_size_i}
+            if q:
+                params_i["q"]    = q
+                params_i["modo"] = "exacto" if modo_busqueda == "Exacto" else "semantico"
+            if sentido_i != "(todos)": params_i["sentido"] = sentido_i
+            if ley_i     != "(todos)": params_i["ley"]     = ley_i
+            st.session_state["buscar_params"]  = params_i
+            st.session_state["buscar_page"]    = 1
+            st.session_state["resumen_data"]   = None
+            st.session_state["resumen_numero"] = None
+
+    # ── Sub-tab 2: Búsqueda por campos / metadatos ────────────────────────────
+    with subtab_cam:
+        with st.form("form_buscar_campos"):
+            c_num, c_txt = st.columns(2)
+            numero_q = c_num.text_input(
+                "Nº resolución",
+                placeholder="ej: 0340/2026",
+                help="Busca por número de resolución. Tiene prioridad sobre el campo de texto si ambos están rellenos.",
+            )
+            texto_q = c_txt.text_input(
+                "Texto en descripción o contenido",
+                placeholder="ej: Ayuntamiento de Totana",
+            )
+            c_des, c_has, c_sen, c_ley2, c_ps2 = st.columns(5)
+            fecha_desde = c_des.date_input("Desde",      value=None, format="DD/MM/YYYY", key="bc_desde")
+            fecha_hasta = c_has.date_input("Hasta",      value=None, format="DD/MM/YYYY", key="bc_hasta")
+            sentido_c   = c_sen.selectbox("Sentido",    ["(todos)"] + filtros.get("sentidos", []), key="bc_sentido")
+            ley_c       = c_ley2.selectbox("Ley",       ["(todos)"] + filtros.get("leyes",    []), key="bc_ley")
+            page_size_c = c_ps2.selectbox("Por página", [20, 50, 100], index=0,                    key="bc_ps")
+            submitted_c = st.form_submit_button("Buscar por campos", type="primary", use_container_width=True)
+
+        if submitted_c:
+            params_c = {"page_size": page_size_c}
+            q_campos = numero_q.strip() or texto_q.strip()
+            if q_campos:
+                params_c["q"]    = q_campos
+                params_c["modo"] = "exacto"
+            if fecha_desde: params_c["fecha_desde"] = fecha_desde.strftime("%Y-%m-%d")
+            if fecha_hasta: params_c["fecha_hasta"] = fecha_hasta.strftime("%Y-%m-%d")
+            if sentido_c != "(todos)": params_c["sentido"] = sentido_c
+            if ley_c     != "(todos)": params_c["ley"]     = ley_c
+            st.session_state["buscar_params"]  = params_c
+            st.session_state["buscar_page"]    = 1
+            st.session_state["resumen_data"]   = None
+            st.session_state["resumen_numero"] = None
 
     params       = st.session_state["buscar_params"]
     current_page = st.session_state["buscar_page"]
 
-    if params or submitted:
+    if params:
         with st.spinner("Buscando…"):
             resultado = buscar({**params, "page": current_page})
 
@@ -372,7 +409,14 @@ with tab_buscar:
         rows        = resultado.get("resultados", [])
         ps          = params.get("page_size", 20)
         total_pages = max(1, (total + ps - 1) // ps)
-        modo_label  = "búsqueda exacta" if params.get("modo") == "exacto" else "búsqueda semántica"
+        if params.get("fecha_desde") or params.get("fecha_hasta"):
+            modo_label = "búsqueda por campos"
+        elif params.get("modo") == "exacto":
+            modo_label = "búsqueda exacta"
+        elif params.get("modo") == "semantico":
+            modo_label = "búsqueda semántica"
+        else:
+            modo_label = "filtrado por metadatos"
 
         if rows:
             st.caption(
