@@ -427,7 +427,7 @@ with tab_buscar:
                               unsafe_allow_html=True)
                 c[3].markdown(f"<span style='font-size:13px'>{(row.get('tipo_recurso') or '—')[:55]}</span>",
                               unsafe_allow_html=True)
-                c[4].markdown(f"<span style='font-size:13px'>{(row.get('descripcion') or '—')[:180]}</span>",
+                c[4].markdown(f"<span style='font-size:13px'>{(row.get('descripcion') or '—')[:300]}</span>",
                               unsafe_allow_html=True)
                 with c[5].popover("Resumir", use_container_width=True):
                     cache = st.session_state["buscar_resumen_cache"]
